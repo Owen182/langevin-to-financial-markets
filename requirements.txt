@@ -1,0 +1,9 @@
+# เพิ่ม dependencies เมื่อเริ่มใช้จริง เช่น:
+# numpy
+# pandas
+# scipy
+# matplotlib
+# statsmodels
+# jupyterlab
+# pytest
+
