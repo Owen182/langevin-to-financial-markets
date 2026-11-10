@@ -1,0 +1,53 @@
+import math
+import random
+
+import matplotlib.pyplot as plt
+
+total_time = 1.0
+total_steps = 100
+num_paths = 100
+
+dt = total_time / total_steps
+sd = math.sqrt(dt)
+times = [step * dt for step in range(total_steps + 1)]
+
+paths = []
+
+for run in range(num_paths):
+    position = 0.0
+    path = [position]
+
+    for step in range(total_steps):
+        z = random.gauss(0, 1)
+        position += sd * z
+        path.append(position)
+
+    paths.append(path)
+
+msd = []
+
+for step in range(total_steps + 1):
+    sum_squared = 0.0
+
+    for path in paths:
+        sum_squared += path[step] ** 2
+
+    msd.append(sum_squared / num_paths)
+
+fig, (ax_paths, ax_msd) = plt.subplots(2, 1, figsize=(8, 7))
+
+for path in paths:
+    ax_paths.plot(times, path, alpha=0.2, linewidth=0.8)
+
+ax_paths.set_title("100 Brownian paths")
+ax_paths.set_xlabel("Time")
+ax_paths.set_ylabel("Position")
+
+ax_msd.plot(times, msd, label="Simulated MSD")
+ax_msd.plot(times, times, "--", label="Theory: MSD = t")
+ax_msd.set_xlabel("Time")
+ax_msd.set_ylabel("Mean squared displacement")
+ax_msd.legend()
+
+fig.tight_layout()
+plt.show()
