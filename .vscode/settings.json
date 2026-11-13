@@ -1,0 +1,10 @@
+{
+  "python-envs.defaultEnvManager": "ms-python.python:venv",
+  "python-envs.defaultPackageManager": "ms-python.python:pip",
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/Scripts/python.exe",
+  "files.associations": {
+    "**/scripts/random_walk": "python",
+    "**/scripts/langevin": "python",
+    "**/scripts/brownian_motion": "python"
+  }
+}

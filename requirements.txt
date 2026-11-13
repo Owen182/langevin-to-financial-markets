@@ -2,7 +2,7 @@
 # numpy
 # pandas
 # scipy
-# matplotlib
+matplotlib==3.9.2
 # statsmodels
 # jupyterlab
 # pytest
