@@ -1,7 +1,10 @@
 import math
 import random
+import statistics
 
 import matplotlib.pyplot as plt
+
+num_particles = 10000
 
 m = 1.0
 gamma = 1.0
@@ -14,30 +17,94 @@ dt = total_time / total_steps
 a = gamma / m
 b = math.sqrt(2 * gamma * kBT) / m
 
-x = 0.0
-v = 0.0
-
 times = [step * dt for step in range(total_steps + 1)]
-positions = [x]
-velocities = [v]
+velo_final = []
+pos_final = []
+pos_stored = []
+num_paths_to_plot = 100
+noise_scale = b * math.sqrt(dt)
 
-for step in range(total_steps):
-    z = random.gauss(0, 1)
+for particle in range(num_particles):
+    x = 0.0
+    v = 0.0
+    positions = [x]
 
-    x += v * dt
-    v += -a * v * dt + b * math.sqrt(dt) * z
+    for step in range(total_steps):
+        z = random.gauss(0, 1)
 
-    positions.append(x)
-    velocities.append(v)
+        x += v * dt
+        v += -a * v * dt + noise_scale * z
 
-fig, (ax_x, ax_v) = plt.subplots(2, 1, sharex=True)
+        if particle < num_paths_to_plot:
+            positions.append(x)
 
-ax_x.plot(times, positions)
-ax_x.set_ylabel("Position x")
+    if particle < num_paths_to_plot:
+        pos_stored.append(positions)
 
-ax_v.plot(times, velocities)
-ax_v.set_ylabel("Velocity v")
-ax_v.set_xlabel("Time t")
+    pos_final.append(x)
+    velo_final.append(v)
 
-plt.tight_layout()
+# Plotting the results
+t = times[-1]
+
+# Exact continuous-time variances for x(0) = v(0) = 0
+var_v = b**2 / (2 * a) * (1 - math.exp(-2 * a * t))
+var_x = (b / a)**2 * (
+    t
+    - 2 * (1 - math.exp(-a * t)) / a
+    + (1 - math.exp(-2 * a * t)) / (2 * a)
+)
+
+theory_x = statistics.NormalDist(mu=0, sigma=math.sqrt(var_x))
+theory_v = statistics.NormalDist(mu=0, sigma=math.sqrt(var_v))
+
+fig, (ax_pos, ax_hist) = plt.subplots(
+    1, 2, figsize=(12, 6), sharey=True,
+    gridspec_kw={"width_ratios": [3, 1]},
+)
+
+for path in pos_stored:
+    ax_pos.plot(times, path, alpha=0.2, linewidth=0.8)
+
+ax_pos.set_title("Particle Positions")
+ax_pos.set_xlabel("Time")
+ax_pos.set_ylabel("Position")
+ax_pos.grid(alpha=0.3)
+
+ax_hist.hist(
+    pos_final, bins=40, density=True, orientation="horizontal",
+    alpha=0.5, label="Simulation",
+)
+
+x_min, x_max = ax_hist.get_ylim()
+x_values = [x_min + (x_max - x_min) * i / 299 for i in range(300)]
+ax_hist.plot(
+    [theory_x.pdf(x) for x in x_values], x_values,
+    "--", label="Theory",
+)
+ax_hist.set_title(f"Final Position at t = {t:g}")
+ax_hist.set_xlabel("Density")
+ax_hist.legend()
+fig.tight_layout()
+
+fig_v, ax_v = plt.subplots(figsize=(8, 5))
+ax_v.hist(velo_final, bins=40, density=True, alpha=0.5, label="Simulation")
+
+v_min, v_max = ax_v.get_xlim()
+v_values = [v_min + (v_max - v_min) * i / 299 for i in range(300)]
+ax_v.plot(
+    v_values, [theory_v.pdf(v) for v in v_values],
+    "--", label="Theory",
+)
+ax_v.set_title(f"Final Velocity at t = {t:g}")
+ax_v.set_xlabel("Velocity")
+ax_v.set_ylabel("Density")
+ax_v.legend()
+fig_v.tight_layout()
+
+print(f"Position mean:     {statistics.mean(pos_final):.4f} (theory: 0)")
+print(f"Position variance: {statistics.pvariance(pos_final):.4f} (theory: {var_x:.4f})")
+print(f"Velocity mean:     {statistics.mean(velo_final):.4f} (theory: 0)")
+print(f"Velocity variance: {statistics.pvariance(velo_final):.4f} (theory: {var_v:.4f})")
+
 plt.show()
