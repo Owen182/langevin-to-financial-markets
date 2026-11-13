@@ -14,20 +14,10 @@ $$
 \operatorname{Var}(X) = E[X^2] - (E[X])^2 = \frac{1}{n}.
 $$
 
-As $n$ increases, the Central Limit Theorem explains why the sum of those steps approaches a normal distribution. In the Brownian limit, the change from time $s$ to time $t$ has mean zero and variance $t-s$.
-
-$$
-W_t - W_s \sim \mathcal{N}(0, t-s).
-$$
+As $n$ increases, the Central Limit Theorem explains why the sum of those steps approaches a normal distribution.
 
 ## Why do we use $\Delta W = \sqrt{\Delta t}\,Z$?
 
-In the simulation, one Gaussian draw represents the net change over a whole time step $\Delta t$. I want that change to have variance $\Delta t$, so its standard deviation should be $\sqrt{\Delta t}$.
+In the simulation, one Gaussian draw represents the net change over a whole time step $\Delta t$. We want that change to have variance $\Delta t$, so its standard deviation would be $\sqrt{\Delta t}$.
 
-I draw $Z$ from the standard normal distribution, $Z\sim\mathcal{N}(0,1)$. The numbers $0$ and $1$ specify its mean and variance. A draw can be negative or greater than $1$.
-
-Since $Z$ has standard deviation $1$, multiplying it by $\sqrt{\Delta t}$ gives the change the standard deviation we want.
-
-$$
-\Delta W = \sqrt{\Delta t}\,Z.
-$$
+Drawing $Z$ from the standard normal distribution, $Z\sim\mathcal{N}(0,1)$. The numbers $0$ and $1$ denote its mean and variance. A draw can be negative or greater than $1$, and because $Z$ has standard deviation of $1$, multiplying it by $\sqrt{\Delta t}$ will gives us the variance we want.

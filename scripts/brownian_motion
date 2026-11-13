@@ -1,5 +1,6 @@
 import math
 import random
+import statistics
 
 import matplotlib.pyplot as plt
 
@@ -33,6 +34,13 @@ for step in range(total_steps + 1):
         sum_squared += path[step] ** 2
 
     msd.append(sum_squared / num_paths)
+
+final_positions = [path[-1] for path in paths]
+
+print("Final time:", times[-1])
+print("Mean:", statistics.mean(final_positions))
+print("Variance:", statistics.pvariance(final_positions))
+print("Standard deviation:", statistics.pstdev(final_positions))
 
 fig, (ax_paths, ax_msd) = plt.subplots(2, 1, figsize=(8, 7))
 

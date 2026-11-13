@@ -1,0 +1,66 @@
+import math
+import random
+import statistics
+
+import matplotlib.pyplot as plt
+
+particles = 10
+steps = 1
+repeats = 100000
+
+all_leftist = 0
+all_rightist = 0
+on_origin = 0
+all_same_position_count = 0
+half_left_right_count = 0
+
+position = []
+
+for _ in range(repeats):
+    positions = [0] * particles
+    for i in range(particles):
+        for step in range(steps):
+            move = random.choice([-1, 1])
+            positions[i] += move
+    if all(x == steps*-1 for x in positions):
+        all_leftist += 1
+    if all(x == steps for x in positions):
+        all_rightist += 1
+    on_origin += positions.count(0)
+    if all(x == positions[0] for x in positions):
+        all_same_position_count += 1
+    if positions.count(-steps) == particles // 2 and positions.count(steps) == particles // 2:
+        half_left_right_count += 1
+    position.extend(positions)
+
+
+print(f"Total particle = {particles} Total steps = {steps} Total repeats = {repeats}")
+print(f"All particles are at the same position: {all_same_position_count} or {all_same_position_count / repeats * 100:.3f}%")
+print(f"All particles are on the left: {all_leftist} or {all_leftist / repeats * 100}%")
+print(f"All particles are on the right: {all_rightist} or {all_rightist / repeats * 100}%")
+print(f"All particles are at the same position: {all_same_position_count} or {all_same_position_count / repeats * 100:.3f}%")
+print(f"Number of particles that are at the origin: {on_origin} or {on_origin / (repeats * particles) * 100}%")
+
+print(f"Exactly half of the particles are on the left and half on the right: {half_left_right_count} or {half_left_right_count / repeats * 100:.3f}%")
+
+print(f"Mean position: {statistics.mean(position)}")
+print(f"SD of positions: {statistics.stdev(position)}")
+print(f"Var of positions: {statistics.variance(position)}")
+
+# // distribution of positions
+bin_edges = range(-steps - 1, steps + 2, 2)
+
+plt.hist(position, bins=bin_edges, density=False, alpha=0.7)
+
+
+tick_spacing = max(1, (steps + 4) // 5)
+tick_limit = (steps // tick_spacing) * tick_spacing
+
+plt.xticks(range(-tick_limit, tick_limit + 1, tick_spacing))
+plt.xlim(-steps - 1, steps + 1)
+
+plt.title(f"Distribution of Particle Positions after {steps} Steps")
+plt.xlabel("Position")
+plt.ylabel("Number of particles")
+plt.grid(axis="y", alpha=0.3)
+plt.show()
