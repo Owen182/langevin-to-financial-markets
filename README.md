@@ -1,58 +1,62 @@
-# Langevin to Financial Markets
+# Random Walk Experiments
 
-โครงสำหรับ Quant research project ที่ศึกษาการประยุกต์ Langevin dynamics กับตลาดการเงิน
-โดยตั้งใจเว้น implementation ไว้ให้ลงมือพัฒนาและทดลองด้วยตัวเอง
+A group of numerical investigations that can live inside the `langevin-to-financial-markets` repository.
 
-## Project structure
+## Project layout
 
 ```text
 langevin-to-financial-markets/
-├── configs/                 # ค่าตั้งต้นของ experiment แต่ละชุด
-├── data/
-│   ├── raw/                 # ข้อมูลต้นฉบับ ห้ามแก้ทับ
-│   ├── external/            # ข้อมูลจากแหล่งอื่น เช่น risk-free rate
-│   ├── interim/             # ข้อมูลระหว่างการ clean/transform
-│   └── processed/           # ชุดข้อมูลพร้อมใช้กับ model
-├── docs/                    # สมมติฐาน นิยาม และบันทึกการตัดสินใจ
-├── notebooks/               # EDA และลำดับการทดลอง
-├── reports/
-│   ├── figures/             # กราฟสำหรับรายงาน
-│   └── tables/              # ตารางผลลัพธ์
-├── scripts/                 # คำสั่งรัน pipeline/experiment
-├── src/langevin_finance/
-│   ├── data/                # โหลดและตรวจคุณภาพข้อมูล
-│   ├── features/            # returns, volatility, state variables
-│   ├── models/              # Langevin/SDE และ calibration
-│   ├── evaluation/          # diagnostics, metrics, backtest
-│   └── visualization/       # plotting functions
-├── tests/                   # tests ของโค้ดใน src/
-├── outputs/                 # ผลรันชั่วคราว ไม่ commit
-├── .env.example             # ตัวอย่าง environment variables/API keys
-├── .gitignore
-└── requirements.txt         # dependencies ที่คุณเลือกใช้
+  scripts/
+    random_walk/
+      00_endpoint_probabilities.py
+      01_trajectory_explorer.py
+      02_diffusion_scaling.py
+      03_density_and_entropy.py
+      04_first_passage_and_recurrence.py
+      05_modified_random_walks.py
+      06_self_avoiding_walk.py
+  reports/
+    figures/
+  docs/
+    random_walk_report_notes.md
 ```
 
-## ลำดับที่แนะนำให้ทำ
+This ZIP already follows the suggested layout. Copy `scripts/random_walk/` into your existing repository, merge `docs/` and `reports/`, and keep the rest of your project unchanged. The scripts expect you to run them **from the repository root**, not from within `scripts/random_walk/`.
 
-1. เขียน research question และนิยาม state variable ใน `docs/research-plan.md`
-2. เลือกสินทรัพย์ ความถี่ข้อมูล และช่วงเวลา
-3. ทำ EDA ใน `notebooks/01_data_eda.ipynb`
-4. สร้าง Langevin/OU baseline ด้วยตัวเองใน `src/langevin_finance/models/`
-5. ทำ parameter estimation และ residual diagnostics
-6. แบ่ง train/validation/test ตามเวลา และทำ walk-forward test
-7. เปรียบเทียบกับ baseline ที่ง่ายกว่า
-8. เพิ่ม transaction costs และตรวจ look-ahead/survivorship bias ก่อนสรุปผล
+## Running
 
-## Notebook naming
+Install dependencies:
 
-```text
-01_data_eda.ipynb
-02_state_variable.ipynb
-03_langevin_baseline.ipynb
-04_calibration_diagnostics.ipynb
-05_simulation_validation.ipynb
-06_strategy_backtest.ipynb
+```powershell
+python -m pip install -r requirements.txt
 ```
 
-เริ่มจาก model เล็กที่สุดก่อน และย้ายเฉพาะโค้ดที่ใช้ซ้ำออกจาก notebook ไปไว้ใน `src/`.
+From your project root:
 
+```powershell
+python scripts/random_walk/00_endpoint_probabilities.py
+python scripts/random_walk/01_trajectory_explorer.py
+python scripts/random_walk/02_diffusion_scaling.py
+python scripts/random_walk/03_density_and_entropy.py
+python scripts/random_walk/04_first_passage_and_recurrence.py
+python scripts/random_walk/05_modified_random_walks.py
+python scripts/random_walk/06_self_avoiding_walk.py
+```
+
+The same commands work directly after extracting this ZIP and opening its top-level folder.
+
+All scripts write figures to `reports/figures/`. They do **not** require CLI arguments or modify your original repository. To experiment, edit the variables at the top of each file.
+
+## Scientific notes
+
+- Random walks assume independent nearest-neighbor jumps unless the specific experiment says otherwise.
+- The 2D and 3D models choose one coordinate axis per step; total squared displacement is still expected to be `n`.
+- `03_density_and_entropy.py` uses SciPy only to smooth **displayed contour lines**. Probability heatmap uses unsmoothed data. Discrete entropy is in **nats**, not differential entropy.
+- A finite first-passage simulation has **censored** non-hits. Do not treat the mean among observed hits as the true mean hitting time.
+- Finite-time return fractions are **not** infinite-time recurrence probabilities.
+- Greedy self-avoiding paths are *not* sampled uniformly from all fixed-length self-avoiding walks.
+- In biased walks, compare `Var(X)` and `E[X^2]` separately so drift is not confused with enhanced diffusion.
+
+## Suggested order for a report
+
+Start with 00, 02 and 03 (binomial → diffusion and Gaussian approximation); connect them to Brownian motion, the diffusion equation and your Langevin simulation. Use 04–06 as extensions, or as the basis for a separate repository later.
