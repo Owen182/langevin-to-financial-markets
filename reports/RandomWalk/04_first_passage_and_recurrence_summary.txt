@@ -1,0 +1,8 @@
+Hit +10 by 4000 steps: 87.80%
+Mean hitting time among hits only: 459.6
+This conditional/censored mean is NOT the unconditional theoretical expectation.
+Theory: eventual hit probability = 1, but expected hitting time = infinity.
+1D: returned by step 2500: 0.981
+2D: returned by step 2500: 0.706
+3D: returned by step 2500: 0.341
+Infinite-time theory: 1D and 2D eventual return = 1; 3D < 1.

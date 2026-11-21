@@ -1,0 +1,5 @@
+Final time: 1.0
+Mean: 0.12944355411713943 | Theory: 0
+Variance: 0.9855528188903337 | Theory: 1.0
+Standard deviation: 0.992750129131361 | Theory: 1.0
+Final MSD: 1.0023084525928103 | Theory: 1.0

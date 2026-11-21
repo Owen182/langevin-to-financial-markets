@@ -16,7 +16,7 @@ langevin-to-financial-markets/
       05_modified_random_walks.py
       06_self_avoiding_walk.py
   reports/
-    figures/
+    RandomWalk/
   docs/
     random_walk_report_notes.md
 ```
@@ -45,7 +45,9 @@ python scripts/random_walk/06_self_avoiding_walk.py
 
 The same commands work directly after extracting this ZIP and opening its top-level folder.
 
-All scripts write figures to `reports/figures/`. They do **not** require CLI arguments or modify your original repository. To experiment, edit the variables at the top of each file.
+The Random Walk scripts write figures to `reports/RandomWalk/`. The scripts that print numerical results also save those results as `*_summary.txt` in the same folder. Each successful run replaces that script's previous summary. To experiment, edit the variables at the top of each file.
+
+`python scripts/langevin` saves its position and velocity statistics in `reports/Langevin/langevin_summary.txt`. `python scripts/brownian_motion` saves its final statistics in `reports/Brownian/brownian_motion_summary.txt` and displays its figure. The report figure generator saves its Langevin statistics in `docs/brownian_langevin_source/make_figures_summary.txt`.
 
 ## Scientific notes
 

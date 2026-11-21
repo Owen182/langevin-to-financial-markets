@@ -1,0 +1,4 @@
+Position mean:     -0.0941 (theory: 0)
+Position variance: 16.8838 (theory: 17.0002)
+Velocity mean:     0.0110 (theory: 0)
+Velocity variance: 0.9987 (theory: 1.0000)

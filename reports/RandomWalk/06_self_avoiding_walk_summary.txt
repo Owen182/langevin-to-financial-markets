@@ -1,0 +1,8 @@
+Self-avoiding path 1: 133 steps before trap or limit
+Self-avoiding path 2: 39 steps before trap or limit
+Self-avoiding path 3: 102 steps before trap or limit
+Self-avoiding path 4: 188 steps before trap or limit
+Self-avoiding path 5: 37 steps before trap or limit
+Self-avoiding path 6: 38 steps before trap or limit
+Self-avoiding path 7: 41 steps before trap or limit
+Self-avoiding path 8: 44 steps before trap or limit

@@ -7,6 +7,7 @@ from pathlib import Path
 project_dir = Path(__file__).resolve().parents[2]
 figure_dir = project_dir / "reports" / "RandomWalk"
 figure_dir.mkdir(parents=True, exist_ok=True)
+summary_lines = []
 
 # Experiment 6: ordinary vs self-avoiding walks in 2D.
 # This is a kinetic-growth (greedy) self-avoiding walk, NOT uniform sampling
@@ -46,7 +47,7 @@ for i in range(walks):
         path_x.append(x)
         path_y.append(y)
     ax2.plot(path_x, path_y, alpha=0.65)
-    print(f"Self-avoiding path {i+1}: {len(path_x)-1} steps before trap or limit")
+    summary_lines.append(f"Self-avoiding path {i+1}: {len(path_x)-1} steps before trap or limit")
 
 ax1.set_title("Ordinary 2D Walks")
 ax2.set_title("Kinetic-Growth Self-Avoiding Walks")
@@ -58,3 +59,7 @@ for ax in [ax1, ax2]:
 plt.tight_layout()
 plt.savefig(figure_dir / "06_self_avoiding.png", dpi=160)
 plt.close()
+
+summary = "\n".join(summary_lines)
+(figure_dir / "06_self_avoiding_walk_summary.txt").write_text(summary + "\n", encoding="utf-8")
+print(summary)

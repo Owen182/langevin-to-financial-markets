@@ -99,5 +99,14 @@ ax.legend()
 fig.savefig(out / "langevin_velocity.pdf")
 plt.close(fig)
 
-for data, var in [(pos_final, var_x), (velo_final, var_v)]:
-    print(f"{statistics.mean(data):.6f} {statistics.pvariance(data):.6f} {var:.6f}")
+summary_lines = []
+for label, data, var in [
+    ("Position", pos_final, var_x),
+    ("Velocity", velo_final, var_v),
+]:
+    summary_lines.append(f"{label} mean: {statistics.mean(data):.6f} | Theory: 0")
+    summary_lines.append(f"{label} variance: {statistics.pvariance(data):.6f} | Theory: {var:.6f}")
+
+summary = "\n".join(summary_lines)
+(out / "make_figures_summary.txt").write_text(summary + "\n", encoding="utf-8")
+print(summary)

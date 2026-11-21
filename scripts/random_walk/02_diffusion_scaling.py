@@ -47,9 +47,31 @@ top = sum((log_t[i] - mean_t) * (log_msd[i] - mean_m) for i in range(len(log_t))
 bottom = sum((x - mean_t)**2 for x in log_t)
 alpha = top / bottom
 
-print(f"Measured MSD scaling exponent alpha = {alpha:.4f} | Theory = 1")
-print(f"Final MSD = {msd[-1]:.3f} | Theory = {steps}")
-print(f"Final variance = {variance[-1]:.3f} | Theory = {steps}")
+
+# Comparing simulation with theory
+theory_msd = steps
+theory_alpha = 1.0
+
+msd_error = abs(msd[-1] - theory_msd) / theory_msd * 100
+variance_error = abs(variance[-1] - steps) / steps * 100
+alpha_error = abs(alpha - theory_alpha) * 100
+
+print("\n--- Diffusion Scaling Results ---")
+print(f"Number of walks: {walks}")
+print(f"Number of steps: {steps}")
+
+print(f"\nMeasured alpha: {alpha:.5f}")
+print(f"Theoretical alpha: {theory_alpha:.5f}")
+print(f"Alpha difference: {alpha_error:.3f}")
+
+print(f"\nFinal MSD: {msd[-1]:.4f}")
+print(f"Theoretical MSD: {theory_msd:.4f}")
+print(f"Relative error: {msd_error:.3f}%")
+
+print(f"\nFinal variance: {variance[-1]:.4f}")
+print(f"Theoretical variance: {steps:.4f}")
+print(f"Relative error: {variance_error:.3f}%")
+
 
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
 ax1.plot(times, msd, label="Simulation: E[X^2]")

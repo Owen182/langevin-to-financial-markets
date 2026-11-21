@@ -5,10 +5,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from pathlib import Path
+from scipy.ndimage import gaussian_filter
 
 project_dir = Path(__file__).resolve().parents[2]
 figure_dir = project_dir / "reports" / "RandomWalk"
 figure_dir.mkdir(parents=True, exist_ok=True)
+summary_lines = []
 
 # Experiment 3: predictable distributions emerge from unpredictable steps.
 walks = 16000
@@ -42,7 +44,7 @@ for ax, n in zip(axes.flat, steps_to_show):
     ax.set_xlabel("Position")
     ax.set_ylabel("Probability")
     ax.legend()
-    print(f"Step {n}: empirical entropy {entropy:.4f} | theory {entropy_theory:.4f}")
+    summary_lines.append(f"Step {n}: empirical entropy {entropy:.4f} | theory {entropy_theory:.4f}")
 
 fig.suptitle("1D Probability Distributions: Entropy in Natural Units (nats)")
 plt.tight_layout()
@@ -72,7 +74,8 @@ limit = 28
 bins = np.arange(-limit - 0.5, limit + 1.5, 1)
 hist, edges_x, edges_y = np.histogram2d(final_x, final_y, bins=(bins, bins))
 # Smooth only for plotting contours (not for computing physical probabilities).
-from scipy.ndimage import gaussian_filter
+
+
 smoothed = gaussian_filter(hist / walks_2d, sigma=2.0)
 centers = (bins[:-1] + bins[1:]) / 2
 
@@ -87,3 +90,7 @@ plt.colorbar(mesh, ax=ax, label="Probability per lattice cell")
 plt.tight_layout()
 plt.savefig(figure_dir / "03_density_contour.png", dpi=160)
 plt.close()
+
+summary = "\n".join(summary_lines)
+(figure_dir / "03_density_and_entropy_summary.txt").write_text(summary + "\n", encoding="utf-8")
+print(summary)

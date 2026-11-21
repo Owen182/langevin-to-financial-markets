@@ -1,0 +1,8 @@
+Particles: 10 | Steps: 12 | Repeats: 10000
+All same: 0.000000 | Theory: 0.000000
+All left: 0.000000 | Theory: 0.000000
+All right: 0.000000 | Theory: 0.000000
+At origin: 0.225640 | Theory: 0.225586
+Half at each extreme: 0.000000 | Theory: 0.000000
+Mean: 0.0047 | Theory: 0
+Variance: 12.0159 | Theory: 12

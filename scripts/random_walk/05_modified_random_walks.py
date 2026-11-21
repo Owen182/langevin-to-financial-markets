@@ -53,6 +53,56 @@ for model in models:
     variance = [max(0.0, msd[j]-mean[j]**2) for j in range(len(times))]
     results[model] = (mean, msd, variance)
 
+
+# Comparing the modified walks with theory
+print("\n--- Modified Random Walk Results ---")
+
+for model in models:
+    mean, msd, variance = results[model]
+
+    if model == "Ordinary":
+        theory_mean = 0
+        theory_variance = steps
+        theory_msd = steps
+
+    elif model == "Biased":
+        drift = 2 * bias_right - 1
+
+        theory_mean = drift * steps
+        theory_variance = (1 - drift**2) * steps
+        theory_msd = theory_variance + theory_mean**2
+
+    else:
+        # Correlation between steps in the persistent walk
+        correlation = 2 * p_keep_direction - 1
+
+        theory_mean = 0
+        theory_variance = steps
+
+        for k in range(1, steps):
+            theory_variance += 2 * (steps - k) * correlation**k
+
+        theory_msd = theory_variance
+
+    mean_error = abs(mean[-1] - theory_mean)
+    variance_error = abs(variance[-1] - theory_variance)
+    msd_error = abs(msd[-1] - theory_msd)
+
+    print(f"\n{model} Walk")
+
+    print(f"Mean: {mean[-1]:.4f} | Theory: {theory_mean:.4f}")
+    print(f"Absolute difference: {mean_error:.4f}")
+
+    print(f"Variance: {variance[-1]:.4f} | Theory: {theory_variance:.4f}")
+    print(f"Absolute difference: {variance_error:.4f}")
+
+    print(f"MSD: {msd[-1]:.4f} | Theory: {theory_msd:.4f}")
+    print(f"Absolute difference: {msd_error:.4f}")
+
+    if theory_msd > 0:
+        print(f"MSD relative error: {msd_error / theory_msd * 100:.3f}%")
+
+
 fig, axes = plt.subplots(1, 3, figsize=(16, 5))
 for model in models:
     mean, msd, variance = results[model]

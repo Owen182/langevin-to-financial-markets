@@ -1,6 +1,7 @@
 import math
 import random
 import statistics
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 
@@ -37,10 +38,14 @@ for step in range(total_steps + 1):
 
 final_positions = [path[-1] for path in paths]
 
-print("Final time:", times[-1])
-print("Mean:", statistics.mean(final_positions))
-print("Variance:", statistics.pvariance(final_positions))
-print("Standard deviation:", statistics.pstdev(final_positions))
+final_time = times[-1]
+summary = "\n".join([
+    f"Final time: {final_time}",
+    f"Mean: {statistics.mean(final_positions)} | Theory: 0",
+    f"Variance: {statistics.pvariance(final_positions)} | Theory: {final_time}",
+    f"Standard deviation: {statistics.pstdev(final_positions)} | Theory: {math.sqrt(final_time)}",
+    f"Final MSD: {msd[-1]} | Theory: {final_time}",
+])
 
 fig, (ax_paths, ax_msd) = plt.subplots(2, 1, figsize=(8, 7))
 
@@ -58,4 +63,8 @@ ax_msd.set_ylabel("Mean squared displacement")
 ax_msd.legend()
 
 fig.tight_layout()
+figure_dir = Path(__file__).resolve().parents[1] / "reports" / "Brownian"
+figure_dir.mkdir(parents=True, exist_ok=True)
+(figure_dir / "brownian_motion_summary.txt").write_text(summary + "\n", encoding="utf-8")
+print(summary)
 plt.show()

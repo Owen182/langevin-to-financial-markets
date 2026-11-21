@@ -7,6 +7,7 @@ from pathlib import Path
 project_dir = Path(__file__).resolve().parents[2]
 figure_dir = project_dir / "reports" / "RandomWalk"
 figure_dir.mkdir(parents=True, exist_ok=True)
+summary_lines = []
 
 # Experiment 4A: time until a 1D walker first reaches +target.
 target = 10
@@ -22,11 +23,11 @@ for i in range(walks):
             hitting_times.append(step)
             break
 
-print(f"Hit +{target} by {max_steps} steps: {len(hitting_times)/walks:.2%}")
+summary_lines.append(f"Hit +{target} by {max_steps} steps: {len(hitting_times)/walks:.2%}")
 if hitting_times:
-    print(f"Mean hitting time among hits only: {sum(hitting_times)/len(hitting_times):.1f}")
-    print("This conditional/censored mean is NOT the unconditional theoretical expectation.")
-print("Theory: eventual hit probability = 1, but expected hitting time = infinity.")
+    summary_lines.append(f"Mean hitting time among hits only: {sum(hitting_times)/len(hitting_times):.1f}")
+    summary_lines.append("This conditional/censored mean is NOT the unconditional theoretical expectation.")
+summary_lines.append("Theory: eventual hit probability = 1, but expected hitting time = infinity.")
 
 checkpoints = list(range(0, max_steps + 1, 40))
 survival = []
@@ -70,7 +71,7 @@ for dimension in [1, 2, 3]:
     for t in checkpoints:
         probability.append(sum(x <= t for x in return_times) / walks_return)
     ax.plot(checkpoints, probability, "o-", label=f"{dimension}D")
-    print(f"{dimension}D: returned by step {max_steps_return}: {len(return_times)/walks_return:.3f}")
+    summary_lines.append(f"{dimension}D: returned by step {max_steps_return}: {len(return_times)/walks_return:.3f}")
 
 ax.set_xscale("log")
 ax.set_ylim(0, 1)
@@ -82,4 +83,8 @@ ax.legend()
 plt.tight_layout()
 plt.savefig(figure_dir / "04_recurrence.png", dpi=160)
 plt.close()
-print("Infinite-time theory: 1D and 2D eventual return = 1; 3D < 1.")
+summary_lines.append("Infinite-time theory: 1D and 2D eventual return = 1; 3D < 1.")
+
+summary = "\n".join(summary_lines)
+(figure_dir / "04_first_passage_and_recurrence_summary.txt").write_text(summary + "\n", encoding="utf-8")
+print(summary)

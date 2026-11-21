@@ -1,0 +1,5 @@
+Ordinary: final mean=-0.46, MSD=580.47, variance=580.26
+Biased: final mean=179.64, MSD=32812.26, variance=540.53
+Persistent: final mean=0.89, MSD=5182.66, variance=5181.87
+Note: a persistent walk crosses from near-ballistic to diffusive scaling.
+A biased walk's MSD can appear quadratic because of drift; check variance.

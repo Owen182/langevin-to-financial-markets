@@ -9,6 +9,7 @@ from pathlib import Path
 project_dir = Path(__file__).resolve().parents[2]
 figure_dir = project_dir / "reports" / "RandomWalk"
 figure_dir.mkdir(parents=True, exist_ok=True)
+summary_lines = []
 
 # Experiment 0: distribution of final positions (1D)
 particles = 10
@@ -68,14 +69,14 @@ p_half = ways * p_endpoint**(2 * half)
 if remaining == 1:
     p_half *= (1 - 2 * p_endpoint) if steps > 0 else 0
 
-print(f"Particles: {particles} | Steps: {steps} | Repeats: {repeats}")
-print(f"All same: {all_same_position_count / repeats:.6f} | Theory: {p_same:.6f}")
-print(f"All left: {all_leftist / repeats:.6f} | Theory: {p_endpoint**particles:.6f}")
-print(f"All right: {all_rightist / repeats:.6f} | Theory: {p_endpoint**particles:.6f}")
-print(f"At origin: {on_origin / (particles * repeats):.6f} | Theory: {p_origin:.6f}")
-print(f"Half at each extreme: {half_left_right_count / repeats:.6f} | Theory: {p_half:.6f}")
-print(f"Mean: {statistics.mean(positions_all):.4f} | Theory: 0")
-print(f"Variance: {statistics.pvariance(positions_all):.4f} | Theory: {steps}")
+summary_lines.append(f"Particles: {particles} | Steps: {steps} | Repeats: {repeats}")
+summary_lines.append(f"All same: {all_same_position_count / repeats:.6f} | Theory: {p_same:.6f}")
+summary_lines.append(f"All left: {all_leftist / repeats:.6f} | Theory: {p_endpoint**particles:.6f}")
+summary_lines.append(f"All right: {all_rightist / repeats:.6f} | Theory: {p_endpoint**particles:.6f}")
+summary_lines.append(f"At origin: {on_origin / (particles * repeats):.6f} | Theory: {p_origin:.6f}")
+summary_lines.append(f"Half at each extreme: {half_left_right_count / repeats:.6f} | Theory: {p_half:.6f}")
+summary_lines.append(f"Mean: {statistics.mean(positions_all):.4f} | Theory: 0")
+summary_lines.append(f"Variance: {statistics.pvariance(positions_all):.4f} | Theory: {steps}")
 
 # The points are separated by 2, so use bins centered on attainable positions.
 bin_edges = [x - 1 for x in possible_positions] + [possible_positions[-1] + 1]
@@ -93,3 +94,7 @@ plt.legend()
 plt.tight_layout()
 plt.savefig(figure_dir / "00_endpoint_distribution.png", dpi=160)
 plt.close()
+
+summary = "\n".join(summary_lines)
+(figure_dir / "00_endpoint_probabilities_summary.txt").write_text(summary + "\n", encoding="utf-8")
+print(summary)

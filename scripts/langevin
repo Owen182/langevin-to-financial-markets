@@ -1,3 +1,4 @@
+
 import math
 import random
 import statistics
@@ -23,16 +24,34 @@ a = gamma / m
 b = math.sqrt(2 * gamma * kBT) / m
 
 times = [step * dt for step in range(total_steps + 1)]
+
 velo_final = []
 pos_final = []
 pos_stored = []
+
 num_paths_to_plot = 100
 noise_scale = b * math.sqrt(dt)
 
+# Store the statistics every 10 steps
+record_every = 10
+record_steps = [
+    step for step in range(total_steps + 1)
+    if step % record_every == 0 or step == total_steps
+]
+record_times = [step * dt for step in record_steps]
+
+sum_x = [0.0] * len(record_steps)
+sum_x2 = [0.0] * len(record_steps)
+sum_v = [0.0] * len(record_steps)
+sum_v2 = [0.0] * len(record_steps)
+
+# Simulating the particles
 for particle in range(num_particles):
     x = 0.0
     v = 0.0
+
     positions = [x]
+    index = 1
 
     for step in range(total_steps):
         z = random.gauss(0, 1)
@@ -43,26 +62,67 @@ for particle in range(num_particles):
         if particle < num_paths_to_plot:
             positions.append(x)
 
+        current_step = step + 1
+
+        if current_step % record_every == 0 or current_step == total_steps:
+            sum_x[index] += x
+            sum_x2[index] += x**2
+
+            sum_v[index] += v
+            sum_v2[index] += v**2
+
+            index += 1
+
     if particle < num_paths_to_plot:
         pos_stored.append(positions)
 
     pos_final.append(x)
     velo_final.append(v)
 
-# Plotting the results
-t = times[-1]
+# Calculating statistics at each recorded time
+mean_x = [x / num_particles for x in sum_x]
+mean_v = [v / num_particles for v in sum_v]
 
-# Exact continuous-time variances for x(0) = v(0) = 0
-var_v = b**2 / (2 * a) * (1 - math.exp(-2 * a * t))
-var_x = (b / a)**2 * (
-    t
-    - 2 * (1 - math.exp(-a * t)) / a
-    + (1 - math.exp(-2 * a * t)) / (2 * a)
+msd_x = [x / num_particles for x in sum_x2]
+msd_v = [v / num_particles for v in sum_v2]
+
+var_x_sim = []
+var_v_sim = []
+
+for i in range(len(record_times)):
+    var_x_sim.append(msd_x[i] - mean_x[i]**2)
+    var_v_sim.append(msd_v[i] - mean_v[i]**2)
+
+# Continuous-time theoretical predictions
+theory_var_x = []
+theory_var_v = []
+
+for t in record_times:
+    vx = (b / a)**2 * (
+        t
+        - 2 * (1 - math.exp(-a * t)) / a
+        + (1 - math.exp(-2 * a * t)) / (2 * a)
+    )
+
+    vv = b**2 / (2 * a) * (1 - math.exp(-2 * a * t))
+
+    theory_var_x.append(vx)
+    theory_var_v.append(vv)
+
+# Final theoretical distributions
+t = times[-1]
+var_x = theory_var_x[-1]
+var_v = theory_var_v[-1]
+
+theory_x = statistics.NormalDist(
+    mu=0, sigma=math.sqrt(var_x)
 )
 
-theory_x = statistics.NormalDist(mu=0, sigma=math.sqrt(var_x))
-theory_v = statistics.NormalDist(mu=0, sigma=math.sqrt(var_v))
+theory_v = statistics.NormalDist(
+    mu=0, sigma=math.sqrt(var_v)
+)
 
+# Figure 1: Position paths and final position distribution
 fig, (ax_pos, ax_hist) = plt.subplots(
     1, 2, figsize=(12, 6), sharey=True,
     gridspec_kw={"width_ratios": [3, 1]},
@@ -77,51 +137,129 @@ ax_pos.set_ylabel("Position")
 ax_pos.grid(alpha=0.3)
 
 ax_hist.hist(
-    pos_final, bins=40, density=True, orientation="horizontal",
-    alpha=0.5, label="Simulation",
+    pos_final, bins=40, density=True,
+    orientation="horizontal",
+    alpha=0.5, label="Simulation"
 )
 
 x_min, x_max = ax_hist.get_ylim()
-x_values = [x_min + (x_max - x_min) * i / 299 for i in range(300)]
+
+x_values = [
+    x_min + (x_max - x_min) * i / 299
+    for i in range(300)
+]
+
 ax_hist.plot(
-    [theory_x.pdf(x) for x in x_values], x_values,
-    "--", label="Theory",
+    [theory_x.pdf(x) for x in x_values],
+    x_values, "--", label="Theory"
 )
+
 ax_hist.set_title(f"Final Position at t = {t:g}")
 ax_hist.set_xlabel("Density")
 ax_hist.legend()
+
 fig.tight_layout()
+fig.savefig(figure_dir / "position_distribution.png", dpi=160)
 
-# Save position figure
-position_file = figure_dir / "position_distribution.png"
-fig.savefig(position_file, dpi=160)
-
+# Figure 2: Final velocity distribution
 fig_v, ax_v = plt.subplots(figsize=(8, 5))
-ax_v.hist(velo_final, bins=40, density=True, alpha=0.5, label="Simulation")
+
+ax_v.hist(
+    velo_final, bins=40, density=True,
+    alpha=0.5, label="Simulation"
+)
 
 v_min, v_max = ax_v.get_xlim()
-v_values = [v_min + (v_max - v_min) * i / 299 for i in range(300)]
+
+v_values = [
+    v_min + (v_max - v_min) * i / 299
+    for i in range(300)
+]
+
 ax_v.plot(
-    v_values, [theory_v.pdf(v) for v in v_values],
-    "--", label="Theory",
+    v_values,
+    [theory_v.pdf(v) for v in v_values],
+    "--", label="Theory"
 )
+
 ax_v.set_title(f"Final Velocity at t = {t:g}")
 ax_v.set_xlabel("Velocity")
 ax_v.set_ylabel("Density")
 ax_v.legend()
+
 fig_v.tight_layout()
+fig_v.savefig(figure_dir / "velocity_distribution.png", dpi=160)
 
-# Save velocity figure
-velocity_file = figure_dir / "velocity_distribution.png"
-fig_v.savefig(velocity_file, dpi=160)
+# Figure 3: Evolution toward thermal equilibrium
+fig_e, (ax1, ax2) = plt.subplots(
+    1, 2, figsize=(12, 5)
+)
 
-print(f"Position mean:     {statistics.mean(pos_final):.4f} (theory: 0)")
-print(f"Position variance: {statistics.pvariance(pos_final):.4f} (theory: {var_x:.4f})")
-print(f"Velocity mean:     {statistics.mean(velo_final):.4f} (theory: 0)")
-print(f"Velocity variance: {statistics.pvariance(velo_final):.4f} (theory: {var_v:.4f})")
+ax1.plot(
+    record_times, var_v_sim,
+    label="Simulation"
+)
+ax1.plot(
+    record_times, theory_var_v,
+    "--", label="Continuous-time theory"
+)
+ax1.axhline(
+    kBT / m, color="black", linestyle=":",
+    label="Equipartition"
+)
 
-print(f"\nFigures saved:")
-print(position_file)
-print(velocity_file)
+ax1.set_title("Velocity Variance")
+ax1.set_xlabel("Time")
+ax1.set_ylabel("Variance")
+ax1.grid(alpha=0.3)
+ax1.legend()
+
+ax2.plot(
+    record_times, msd_x,
+    label="Simulation MSD"
+)
+ax2.plot(
+    record_times, theory_var_x,
+    "--", label="Continuous-time theory"
+)
+
+ax2.set_title("Position Mean Squared Displacement")
+ax2.set_xlabel("Time")
+ax2.set_ylabel("MSD")
+ax2.grid(alpha=0.3)
+ax2.legend()
+
+fig_e.tight_layout()
+fig_e.savefig(figure_dir / "equilibrium_evolution.png", dpi=160)
+
+# Quantitative results
+position_error = abs(var_x_sim[-1] - var_x) / var_x * 100
+velocity_error = abs(var_v_sim[-1] - var_v) / var_v * 100
+
+print("\n--- Langevin Simulation Results ---")
+print(f"Particles: {num_particles}")
+print(f"Total time: {total_time}")
+print(f"dt: {dt}")
+
+print(f"\nPosition mean: {mean_x[-1]:.5f}")
+print(f"Position variance: {var_x_sim[-1]:.5f}")
+print(f"Theoretical variance: {var_x:.5f}")
+print(f"Relative error: {position_error:.3f}%")
+
+print(f"\nVelocity mean: {mean_v[-1]:.5f}")
+print(f"Velocity variance: {var_v_sim[-1]:.5f}")
+print(f"Theoretical variance: {var_v:.5f}")
+print(f"Relative error: {velocity_error:.3f}%")
+
+print(f"\nEquipartition prediction: {kBT / m:.5f}")
+
+# Stationary variance of Euler-Maruyama
+r = 1 - a * dt
+var_v_em = b**2 * dt / (1 - r**2)
+
+print(f"Euler-Maruyama stationary variance: {var_v_em:.5f}")
+
+print("\nFigures saved to:")
+print(figure_dir)
 
 plt.show()
